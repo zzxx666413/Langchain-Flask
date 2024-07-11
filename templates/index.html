@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: linear-gradient(to right, #4CAF50, #007bff);
+  }
+  .chat-container {
+    width: 90%;
+    height: 90%;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    position: relative;
+  }
+  .chat-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #ccc;
+  }
+  .chat-header h1 {
+    font-size: 24px;
+    color: #007bff;
+  }
+  .chat-header img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+  }
+  .chat {
+    height: calc(100% - 50px - 10%);
+    overflow-y: scroll;
+    padding: 10px;
+  }
+  .message {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: #fff;
+    max-width: 70%;
+    word-break: break-word;
+    transition: transform .3s ease-in-out, opacity .3s ease-in-out; 
+  }
+  
+.message.hidden {
+   transform : scale(0);
+   opacity :0; 
+}
+  
+.message.show {
+   transform : scale(1);
+   opacity :1; 
+}
+  
+.user-message {
+   text-align : left; 
+   background-color : #007bff; 
+}
+  
+.ai-message {
+   text-align : right; 
+}
+  
+.input-container {
+   display : flex; 
+   justify-content : space-between; 
+   align-items : center; 
+   height :10%; 
+   padding :10px; 
+   background-color :#f4f4f4; 
+   border-top :1px solid #ccc; 
+}
+  
+#questionInput {
+   width :80%; 
+   padding :10px; 
+   font-size :16px; 
+   border :1px solid #ccc; 
+   border-radius :5px; 
+}
+  
+#submitButton {
+   padding :10px 20px; 
+   background-color :#007bff; 
+   color :#fff; 
+   border :none; 
+   border-radius :5px; 
+   cursor :pointer; 
+   font-size :16px; 
+   width :20%; 
+}
+  
+.loading {
+   position :absolute; 
+   top :50%; 
+   left :50%; 
+   transform :translate(-50%, -50%); 
+   display :flex; 
+   justify-content :center; 
+   align-items :center; 
+}
+  
+.loading span {
+   width :10px; 
+   height :10px; 
+   margin-right :5px; 
+   background-color :#007bff; 
+   border-radius :50%; 
+   animation-name :loading; 
+   animation-duration :1s; 
+   animation-iteration-count :infinite; 
+}
+  
+.loading span:nth-child(2) {
+   animation-delay :.2s; 
+}
+  
+.loading span:nth-child(3) {
+   animation-delay :.4s; 
+}
+  
+@keyframes loading {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <img src="https://upload.wikimedia.org/wikipedia/zh/thumb/a/a8/Minghsin_University_of_Science_and_Technology_logo.svg/1200px-Minghsin_University_of_Science_and_Technology_logo.svg.png" alt="must_logo">
+      <h1>明新科技大學實習資料庫問答系統</h1>
+    </div>
+    <div class="chat" id="chat">
+      <!-- 聊天內容將動態加入這裡 -->
+    </div>
+    <div class="input-container">
+      <input id="questionInput" type="text" placeholder="請輸入您的問題...">
+      <button name="answer" id="submitButton" onclick="sendMessage()">送出</button>
+    </div>
+    <!--
+    <div class="loading hidden" id="loading">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>-->
+  </div>
+
+  <script>
+    function sendMessage() {
+      const userInput = document.getElementById('questionInput').value;
+      const chat = document.getElementById('chat');
+      //const loading = document.getElementById('loading');
+
+      // 創建使用者消息元素
+      const userMessage = document.createElement('div');
+      userMessage.classList.add('message', 'user-message', 'hidden');
+      userMessage.textContent = "你: " +userInput;
+
+      // 將使用者消息添加到聊天窗口
+      chat.appendChild(userMessage);
+
+      // 滾動到底部以顯示最新消息
+      chat.scrollTop = chat.scrollHeight;
+
+      // 延遲顯示使用者消息，模擬真實的聊天效果
+      setTimeout(function() {
+        userMessage.classList.remove('hidden');
+        userMessage.classList.add('show');
+        // 播放發送消息的音效
+        //new Audio('^2^').play();
+      }, 500);
+
+      // 使用 AJAX 向伺服器發送請求並處理回應
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", "/ask?question=" + userInput, true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          const responseText = xhr.responseText;
+
+          // 創建AI回答消息元素
+          const aiMessage = document.createElement('div');
+          aiMessage.classList.add('message', 'ai-message', 'hidden');
+          aiMessage.textContent = "AI: " + responseText;
+
+          // 將AI回答消息添加到聊天窗口
+          chat.appendChild(aiMessage);
+
+          // 滾動到底部以顯示最新消息
+          chat.scrollTop = chat.scrollHeight;
+
+          // 隱藏載入中的提示
+          //loading.classList.add('hidden');
+
+          // 延遲顯示AI回答消息，模擬真實的聊天效果
+          setTimeout(function() {
+            aiMessage.classList.remove('hidden');
+            aiMessage.classList.add('show');
+            // 播放接收消息的音效
+            //new Audio('^3^').play();
+          }, 1000);
+        }
+      };
+      xhr.send();
+      
+      // 清除輸入框
+      document.getElementById('questionInput').value = '';
+
+      // 顯示載入中的提示
+      //loading.classList.remove('hidden');
+    }
+
+    // 當按下Enter鍵時也可以送出問題
+    document.getElementById('questionInput').addEventListener('keyup', function(event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        document.getElementById('submitButton').click();
+      }
+    });
+  </script>
+</body>
+</html>
