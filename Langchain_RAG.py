@@ -1,9 +1,6 @@
 import os
-# os.environ["OPENAI_API_KEY"] = "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"
-# apikey = os.environ["OPENAI_API_KEY"]
-import dotenv
-dotenv.load_dotenv()
-
+os.environ["OPENAI_API_KEY"] = ""
+apikey = os.environ["OPENAI_API_KEY"]
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.text_splitter import CharacterTextSplitter
